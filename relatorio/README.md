@@ -1,145 +1,195 @@
-# Relatório do Projeto MyFood
+# Relatorio do Projeto MyFood
 
-## 1. Visão Geral da Arquitetura
+## 1. Descricao Geral do Design Arquitetural
 
-O sistema **MyFood** é um delivery de alimentos, medicamentos e produtos de mercado, desenvolvido em Java com uma arquitetura em três camadas principais:
+O MyFood e um sistema de delivery desenvolvido em Java para gerenciar usuarios, empresas, produtos, pedidos e entregas. A arquitetura foi organizada em camadas, separando a entrada dos comandos, as regras de negocio, os modelos de dominio e a persistencia dos dados.
 
-- **Modelos (models):** Entidades de negócio (usuários, empresas, produtos, pedidos, entregas). São classes POJO que implementam `Serializable` para permitir a persistência.
-- **Serviços (services):** Contêm a lógica de negócio, validações e manipulação dos dados. Cada serviço (`UsuarioService`, `EmpresaService`, `ProdutoService`, `PedidoService`, `EntregaService`) é responsável por uma parte específica do sistema.
-- **Fachada (Facade):** A classe `Facade` fornece uma interface única para todos os comandos da linguagem de script, exposta ao executor de testes. Ela delega as operações para os serviços adequados.
-- **Persistência:** A classe `Database` (Singleton) mantém todos os dados em memória e os persiste automaticamente em arquivo XML (`myfood_data.xml`), utilizando `XMLEncoder`/`XMLDecoder`.
+A classe `Main` executa os testes de aceitacao com EasyAccept. Esses testes chamam a classe `Facade`, que funciona como ponto unico de entrada do sistema. A `Facade` recebe comandos como `criarUsuario`, `criarEmpresa`, `criarPedido` e `getAtributoUsuario`, e delega a execucao para os services especializados.
 
-O projeto foi estruturado para atender aos testes de aceitação originais (User Stories 1 a 8) e passou com sucesso em todos os oito arquivos de script.
+A camada de servicos concentra a logica de negocio. Cada service cuida de um conjunto de responsabilidades: usuarios, empresas, produtos, pedidos ou entregas. A camada de modelos representa as entidades principais do dominio, como `Usuario`, `Empresa`, `Produto`, `Pedido` e `Entrega`. A persistencia e centralizada em `Database`, que mantem os dados em memoria e salva automaticamente em XML no arquivo `myfood_data.xml`.
 
----
+Essa divisao reduz o acoplamento entre as partes do sistema. Os testes nao precisam conhecer os detalhes internos dos services ou da persistencia; eles interagem apenas com a `Facade`. Ao mesmo tempo, os services nao precisam lidar diretamente com a sintaxe dos arquivos de teste, apenas com regras de negocio.
 
-## 2. Estrutura de Diretórios
+## 2. Principais Componentes e Interacoes
 
-raiz/
-├── lib/ # EasyAccept.jar (não incluso)
-├── bin/ # Classes compiladas
-├── MyFood/
-│ ├── exceptions/
-│ │ └── MyFoodException.java # Exceção de regra de negócio
-│ ├── models/
-│ │ ├── Usuario.java # Abstrata, base para usuários
-│ │ ├── Cliente.java
-│ │ ├── DonoEmpresa.java
-│ │ ├── Entregador.java
-│ │ ├── Empresa.java # Abstrata, base para empresas
-│ │ ├── Restaurante.java
-│ │ ├── Mercado.java
-│ │ ├── Farmacia.java
-│ │ ├── Produto.java
-│ │ ├── Pedido.java
-│ │ ├── Entrega.java
-│ │ └── EstadoPedido.java # Enum com estados do pedido
-│ ├── services/
-│ │ ├── Database.java # Singleton de persistência
-│ │ ├── Validador.java # Métodos estáticos de validação
-│ │ ├── UsuarioService.java
-│ │ ├── EmpresaService.java
-│ │ ├── ProdutoService.java
-│ │ ├── PedidoService.java
-│ │ └── EntregaService.java
-│ ├── Facade.java # Fachada principal
-│ └── Main.java # Demonstração simples
-├── tests/
-│ ├── TestRunner.java # Executor próprio de scripts
-│ ├── us*.txt # Scripts de aceitação
-│ └── README.md
-├── relatorio/
-│ └── README.md # Este arquivo
-└── README.md # Raiz do projeto
+### 2.1 Main
 
+A classe `Main` e responsavel por iniciar a validacao do sistema com EasyAccept. Ela chama todos os arquivos de teste existentes no projeto, de `tests/us1_1.txt` ate `tests/us4_2.txt`, sempre apontando para `MyFood.Facade`.
 
----
+Fluxo principal:
 
-## 3. Principais Componentes e suas Responsabilidades
+1. `Main` chama o EasyAccept.
+2. EasyAccept le os scripts de teste.
+3. EasyAccept invoca os metodos publicos da `Facade`.
+4. A `Facade` delega as operacoes para os services.
 
-### 3.1 Modelos
+### 2.2 Facade
 
-- **Usuario (abstrata):** `id`, `nome`, `email`, `senha`, `endereco`. Subclasses: Cliente, DonoEmpresa (com CPF) e Entregador (veículo e placa).
-- **Empresa (abstrata):** `id`, `nome`, `endereco`, `idDono`, lista de entregadores. Subclasses: Restaurante (tipoCozinha), Mercado (abre, fecha, tipoMercado) e Farmacia (aberto24Horas, numeroFuncionarios).
-- **Produto:** `id`, `idEmpresa`, `nome`, `valor`, `categoria`.
-- **Pedido:** `numero`, `idCliente`, `idEmpresa`, `estado` (ABERTO, PREPARANDO, PRONTO, ENTREGANDO, ENTREGUE), lista de IDs de produtos.
-- **Entrega:** `id`, `idPedido`, `idEntregador`, `destino`, `entregue`.
-- **EstadoPedido (enum):** Define as fases do pedido e controla as transições permitidas.
+A classe `Facade` e a interface publica do sistema para os testes de aceitacao. Ela expoe os metodos esperados pelos scripts, como:
 
-### 3.2 Serviços
+- `zerarSistema`
+- `criarUsuario`
+- `login`
+- `getAtributoUsuario`
+- `criarEmpresa`
+- `criarProduto`
+- `criarPedido`
+- `criarEntrega`
 
-- **Database:** Singleton. Mantém listas em memória e gerencia a persistência em XML. Fornece métodos de adição, atualização e consulta.
-- **Validador:** Validações estáticas para campos como nome, email, senha, CPF (formato 14 caracteres), valor, categoria e horários (HH:MM).
-- **UsuarioService:** Criação de clientes, donos e entregadores; login; consulta de atributos. Garante a unicidade de email e placa (entregadores). Realiza validações antes de verificar duplicidade.
-- **EmpresaService:** Criação de restaurantes, mercados e farmácias. Regras de unicidade: mesmo dono pode ter mesmo nome em endereços diferentes; mesmo nome por donos diferentes é proibido. Duplicidade exata (nome + endereço) gera erro específico. Métodos para listar empresas de um dono/entregador, cadastrar entregadores, alterar funcionamento de mercado.
-- **ProdutoService:** Criação, edição e listagem de produtos. Impede duplicidade de nome na mesma empresa.
-- **PedidoService:** Controle do ciclo de vida do pedido (abrir, adicionar produto, fechar, liberar, remover produto). Impede ações em estados inválidos. Retorna informações do pedido formatadas (cliente, estado, produtos, valor).
-- **EntregaService:** Criação de entrega (vincula entregador e pedido liberado). Prioridade para pedidos de farmácia na obtenção de pedidos (obterPedido). Finalização de entrega (altera estado para ENTREGUE). Verifica se entregador está ocupado.
+A `Facade` nao concentra as regras completas de negocio. Seu papel principal e receber a chamada externa, escolher o service correto e retornar o resultado no formato esperado pelos testes.
 
-### 3.3 Facade
+### 2.3 Services
 
-A classe `Facade` (em `MyFood.Facade`) implementa todos os comandos esperados pelos scripts de teste. Os métodos têm exatamente as assinaturas requeridas e delegam a execução aos serviços correspondentes.
+Os services representam a camada de regras de negocio:
 
-### 3.4 TestRunner
+- `UsuarioService`: cria clientes, donos de empresa e entregadores; realiza login; consulta atributos de usuarios.
+- `EmpresaService`: cria restaurantes, mercados e farmacias; consulta empresas; cadastra entregadores; altera funcionamento de mercado.
+- `ProdutoService`: cria, edita, consulta e lista produtos.
+- `PedidoService`: cria pedidos, adiciona e remove produtos, fecha pedidos, libera pedidos e consulta seus atributos.
+- `EntregaService`: cria entregas, consulta entregas, entrega pedidos e obtem pedidos disponiveis para entregadores.
+- `Validador`: centraliza validacoes comuns, como nome, email, senha, endereco, CPF, placa, valor, categoria e horario.
 
-Como o EasyAccept não estava disponível, foi desenvolvido um executor próprio (`tests.TestRunner`) que interpreta os scripts `.txt`, substitui variáveis e compara os resultados com as expectativas (`expect` e `expectError`). Ele cobre todos os comandos da linguagem e foi validado com sucesso em todos os arquivos de teste.
+Esses componentes interagem principalmente com `Database`, que guarda e atualiza os objetos do sistema.
 
----
+### 2.4 Models
 
-## 4. Padrões de Projeto Adotados
+Os models representam as entidades do dominio:
 
-### 4.1 Singleton – `Database`
-Garante uma única instância do repositório de dados, centralizando o estado e a persistência. Todos os serviços acessam a mesma instância via `Database.getInstance()`.
+- `Usuario`: classe abstrata base para `Cliente`, `DonoEmpresa` e `Entregador`.
+- `Empresa`: classe abstrata base para `Restaurante`, `Mercado` e `Farmacia`.
+- `Produto`: representa um item vendido por uma empresa.
+- `Pedido`: representa uma compra feita por um cliente em uma empresa.
+- `Entrega`: representa a entrega de um pedido por um entregador.
+- `EstadoPedido`: enum que representa os estados do pedido.
 
-### 4.2 Factory Method – Serviços de criação
-Os métodos `criarCliente`, `criarDonoEmpresa`, `criarEntregador` (em `UsuarioService`) e `criarRestaurante`, `criarMercado`, `criarFarmacia` (em `EmpresaService`) atuam como fábricas, decidindo qual subclasse instanciar com base nos parâmetros fornecidos.
+As classes abstratas `Usuario` e `Empresa` permitem reaproveitar atributos comuns e especializar comportamentos nas subclasses.
 
-### 4.3 Strategy / State – `EstadoPedido`
-O ciclo de vida do pedido é controlado pela enumeração `EstadoPedido`. Cada método do `PedidoService` verifica o estado atual antes de permitir uma operação, seguindo um comportamento típico do padrão State (embora simplificado por condicionais).
+### 2.5 Database
 
-### 4.4 DAO (Data Access Object) – `Database`
-A classe `Database` abstrai o acesso aos dados, escondendo detalhes da serialização XML. Os serviços manipulam apenas os métodos públicos (`addUsuario`, `updatePedido`, etc.).
+`Database` centraliza o armazenamento do sistema. Ele mantem listas de usuarios, empresas, produtos, pedidos e entregas, alem dos contadores usados para gerar IDs e numeros de pedido.
 
----
+Sempre que um objeto e adicionado ou atualizado, o `Database` salva os dados no arquivo `myfood_data.xml`. Assim, os services nao precisam conhecer os detalhes da serializacao XML.
 
-## 5. Como Compilar e Executar
+## 3. Padroes de Projeto Adotados
 
-### Compilação
+### 3.1 Facade
 
+**Nome do Padrao de Projeto:** Facade.
 
-dir /s /b *.java > sources.txt
-javac -d bin @sources.txt
+**Descricao Geral:** O padrao Facade fornece uma interface simples e unificada para acessar um conjunto de classes mais complexas. Em vez de o cliente conhecer varios objetos internos, ele chama uma unica classe, que coordena as operacoes necessarias.
 
+**Problema Resolvido:** Sem uma fachada, os testes precisariam conhecer diretamente `UsuarioService`, `EmpresaService`, `ProdutoService`, `PedidoService`, `EntregaService` e as regras de formatacao de cada retorno. Isso aumentaria o acoplamento entre os testes e a implementacao interna.
 
-### Execução da Demonstração
+**Identificacao da Oportunidade:** O EasyAccept espera chamar metodos publicos de uma unica classe. Como os scripts de teste usam comandos como `criarUsuario`, `criarEmpresa` e `getPedidos`, ficou natural concentrar essa interface em uma classe especifica.
 
+**Aplicacao no Projeto:** A classe `MyFood.Facade` implementa todos os comandos usados pelos testes. Por exemplo, `criarUsuario(...)` delega para `UsuarioService`, `criarEmpresa(...)` delega para `EmpresaService`, `criarProduto(...)` delega para `ProdutoService`, e assim por diante. A `Facade` tambem adapta alguns retornos para o formato esperado pelos scripts, como em `getEmpresas`.
 
-java -cp bin MyFood.Main
+### 3.2 Singleton
 
+**Nome do Padrao de Projeto:** Singleton.
 
+**Descricao Geral:** O padrao Singleton garante que uma classe tenha apenas uma instancia durante a execucao do programa e fornece um ponto global de acesso a essa instancia.
 
-### Execução dos Testes de Aceitação
+**Problema Resolvido:** O sistema precisa que todos os services trabalhem sobre a mesma base de dados. Se cada service criasse seu proprio banco em memoria, usuarios criados em `UsuarioService` nao seriam encontrados por `PedidoService` ou `EmpresaService`.
 
+**Identificacao da Oportunidade:** Ao observar que todos os services precisam consultar e atualizar as mesmas listas de usuarios, empresas, produtos, pedidos e entregas, foi identificada a necessidade de centralizar esse estado compartilhado.
 
+**Aplicacao no Projeto:** A classe `Database` possui um atributo estatico `instance`, construtor privado e o metodo `getInstance()`. Services como `UsuarioService`, `EmpresaService`, `ProdutoService`, `PedidoService` e `EntregaService` acessam o banco por meio de `Database.getInstance()`. Assim, todos manipulam a mesma instancia.
 
-### Execução dos Testes de Aceitação
+### 3.3 Factory Method Simplificado
 
+**Nome do Padrao de Projeto:** Factory Method, aplicado de forma simplificada.
 
-java -cp bin tests.TestRunner tests/us1_1.txt tests/us1_2.txt tests/us2_1.txt tests/us2_2.txt tests/us3_1.txt tests/us3_2.txt tests/us4_1.txt tests/us4_2.txt tests/us5.txt tests/us6.txt tests/us7.txt tests/us8.txt
+**Descricao Geral:** O Factory Method centraliza a criacao de objetos, permitindo que a logica de instanciacao fique encapsulada em metodos especificos. Em vez de espalhar chamadas diretas a construtores por todo o sistema, a criacao passa por pontos controlados.
 
+**Problema Resolvido:** Usuarios e empresas possuem tipos diferentes, mas compartilham estruturas comuns. Criar esses objetos diretamente em varias partes do sistema aumentaria duplicacao e deixaria as validacoes espalhadas.
 
-Todos os oito testes foram executados com sucesso, validando as funcionalidades da Milestone 1 e 2.
+**Identificacao da Oportunidade:** O projeto possui hierarquias como `Usuario -> Cliente/DonoEmpresa/Entregador` e `Empresa -> Restaurante/Mercado/Farmacia`. Como cada subtipo exige parametros e validacoes proprias, a criacao precisava ficar concentrada.
 
----
+**Aplicacao no Projeto:** `UsuarioService` possui metodos como `criarCliente`, `criarDonoEmpresa` e `criarEntregador`. `EmpresaService` possui `criarRestaurante`, `criarMercado` e `criarFarmacia`. Esses metodos validam os dados, verificam regras de duplicidade e instanciam a subclasse correta antes de registrar o objeto no `Database`.
 
-## 6. Considerações Finais
+### 3.4 DAO / Repository
 
-O sistema atende a todos os requisitos especificados nas User Stories 1 a 8, incluindo:
+**Nome do Padrao de Projeto:** DAO/Repository.
 
-- Criação de contas (cliente, dono, entregador) com validações e unicidade.
-- Criação de empresas (restaurante, mercado, farmácia) com regras de duplicidade.
-- Gerenciamento de produtos.
-- Ciclo completo de pedidos (abertura, adição/remoção de itens, fechamento, liberação e entrega).
-- Priorização de pedidos de farmácia no sistema de entregas.
+**Descricao Geral:** O padrao DAO ou Repository cria uma camada de acesso a dados, escondendo detalhes de armazenamento e oferecendo metodos de consulta, insercao e atualizacao para o restante do sistema.
 
-O projeto foi desenvolvido com princípios de orientação a objetos e padrões de projeto, resultando em um código modular, coeso e de fácil manutenção.
+**Problema Resolvido:** Os services precisam salvar e buscar entidades, mas nao deveriam depender diretamente de detalhes como listas internas, contadores de IDs ou serializacao XML.
+
+**Identificacao da Oportunidade:** Como o projeto precisa persistir dados e reutilizar a mesma base em diferentes services, foi necessario criar um componente responsavel apenas pelo armazenamento e recuperacao dos objetos.
+
+**Aplicacao no Projeto:** A classe `Database` oferece metodos como `addUsuario`, `addEmpresa`, `addProduto`, `addPedido`, `addEntrega`, `updateUsuario`, `updateEmpresa`, `updateProduto`, `updatePedido` e `updateEntrega`. Ela tambem fornece metodos de consulta como `getUsuarios`, `getEmpresas`, `getProdutos`, `getPedidos` e `getEntregas`. Internamente, ela salva e carrega os dados usando XML, mas essa decisao fica escondida dos services.
+
+### 3.5 State Simplificado
+
+**Nome do Padrao de Projeto:** State, aplicado de forma simplificada.
+
+**Descricao Geral:** O padrao State permite alterar o comportamento de um objeto de acordo com seu estado interno. Em uma implementacao classica, cada estado pode ser representado por uma classe. Neste projeto, a ideia foi aplicada de forma simplificada com uma enumeracao e validacoes nos services.
+
+**Problema Resolvido:** Um pedido nao pode aceitar qualquer operacao em qualquer momento. Por exemplo, um pedido fechado nao deve receber novos produtos, e uma entrega concluida deve alterar o estado final do pedido.
+
+**Identificacao da Oportunidade:** O dominio de pedidos possui um ciclo de vida claro: aberto, preparando, pronto, entregando e entregue. Isso indicou a necessidade de controlar transicoes e impedir operacoes invalidas.
+
+**Aplicacao no Projeto:** A enum `EstadoPedido` representa os estados possiveis. `PedidoService` consulta esse estado antes de permitir operacoes como adicionar produto, remover produto, fechar pedido e liberar pedido. `EntregaService` tambem altera o estado do pedido para `ENTREGUE` quando a entrega e finalizada.
+
+### 3.6 Service Layer
+
+**Nome do Padrao de Projeto:** Service Layer.
+
+**Descricao Geral:** O padrao Service Layer organiza a logica de negocio em classes de servico. Ele separa as regras do dominio da interface externa e da camada de persistencia.
+
+**Problema Resolvido:** Sem essa camada, a `Facade` ficaria muito grande e misturaria entrada dos testes, validacoes, regras de negocio, criacao de objetos e persistencia.
+
+**Identificacao da Oportunidade:** O sistema possui varios grupos de regras independentes: usuarios, empresas, produtos, pedidos e entregas. Cada grupo tem validacoes e fluxos proprios, entao separar essas responsabilidades em services tornou a estrutura mais clara.
+
+**Aplicacao no Projeto:** A `Facade` apenas encaminha chamadas. A logica fica em classes como `UsuarioService`, `EmpresaService`, `ProdutoService`, `PedidoService` e `EntregaService`. Por exemplo, `PedidoService` decide se um cliente pode criar pedido, se um produto pertence a empresa e se o pedido pode ser fechado.
+
+## 4. Como Compilar e Executar
+
+### 4.1 Compilar
+
+No PowerShell, dentro da raiz do projeto:
+
+```powershell
+javac -cp "lib\easyaccept.jar" -d bin (Get-Content sources.txt)
+```
+
+### 4.2 Executar com EasyAccept
+
+```powershell
+java -cp "bin;lib\easyaccept.jar" MyFood.Main
+```
+
+A classe `Main` executa os seguintes arquivos:
+
+- `tests/us1_1.txt`
+- `tests/us1_2.txt`
+- `tests/us2_1.txt`
+- `tests/us2_2.txt`
+- `tests/us3_1.txt`
+- `tests/us3_2.txt`
+- `tests/us4_1.txt`
+- `tests/us4_2.txt`
+
+### 4.3 Executar com TestRunner Local
+
+O projeto tambem possui um executor proprio para os scripts:
+
+```powershell
+java -cp bin tests.TestRunner tests/us1_1.txt tests/us1_2.txt tests/us2_1.txt tests/us2_2.txt tests/us3_1.txt tests/us3_2.txt tests/us4_1.txt tests/us4_2.txt
+```
+
+## 5. Consideracoes Finais
+
+O MyFood atende as funcionalidades cobertas pelos testes de aceitacao presentes no projeto, incluindo:
+
+- criacao e consulta de usuarios;
+- login;
+- criacao e consulta de empresas;
+- cadastro de restaurantes, mercados e farmacias;
+- cadastro, edicao e listagem de produtos;
+- abertura, fechamento, liberacao e consulta de pedidos;
+- cadastro de entregadores em empresas;
+- criacao, consulta e conclusao de entregas.
+
+O design adotado favorece separacao de responsabilidades. A `Facade` simplifica o acesso externo, os services concentram regras de negocio, os models representam o dominio e o `Database` centraliza a persistencia. Essa organizacao torna o sistema mais facil de testar, manter e evoluir.
