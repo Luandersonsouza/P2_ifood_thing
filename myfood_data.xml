@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="24.0.2" class="java.beans.XMLDecoder">
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="MyFood.models.DonoEmpresa">
+    <void property="cpf">
+     <string>544.732.410-68</string>
+    </void>
+    <void property="email">
+     <string>roberto@ufal.com.br</string>
+    </void>
+    <void property="endereco">
+     <string>Rua Exemplo N 321</string>
+    </void>
+    <void property="id">
+     <int>1</int>
+    </void>
+    <void property="nome">
+     <string>RobertoDono</string>
+    </void>
+    <void property="senha">
+     <string>123senha</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Cliente">
+    <void property="email">
+     <string>carlos@ufal.com.br</string>
+    </void>
+    <void property="endereco">
+     <string>Rua Exemplo N 123</string>
+    </void>
+    <void property="id">
+     <int>2</int>
+    </void>
+    <void property="nome">
+     <string>Carlos</string>
+    </void>
+    <void property="senha">
+     <string>123senha</string>
+    </void>
+   </object>
+  </void>
+ </object>
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="MyFood.models.Restaurante">
+    <void property="endereco">
+     <string>Rua Segura N 987</string>
+    </void>
+    <void property="id">
+     <int>1</int>
+    </void>
+    <void property="idDono">
+     <int>1</int>
+    </void>
+    <void property="nome">
+     <string>Sorveteria do Roberto</string>
+    </void>
+    <void property="tipoCozinha">
+     <string>brasileira</string>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Restaurante">
+    <void property="endereco">
+     <string>Rua Segura N 987</string>
+    </void>
+    <void property="id">
+     <int>2</int>
+    </void>
+    <void property="idDono">
+     <int>1</int>
+    </void>
+    <void property="nome">
+     <string>Pastelaria do Roberto</string>
+    </void>
+    <void property="tipoCozinha">
+     <string>brasileira</string>
+    </void>
+   </object>
+  </void>
+ </object>
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="MyFood.models.Produto">
+    <void property="categoria">
+     <string>alimento</string>
+    </void>
+    <void property="id">
+     <int>1</int>
+    </void>
+    <void property="idEmpresa">
+     <int>1</int>
+    </void>
+    <void property="nome">
+     <string>Sorvete morango</string>
+    </void>
+    <void property="valor">
+     <float>1.4</float>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Produto">
+    <void property="categoria">
+     <string>alimento</string>
+    </void>
+    <void property="id">
+     <int>2</int>
+    </void>
+    <void property="idEmpresa">
+     <int>1</int>
+    </void>
+    <void property="nome">
+     <string>Sorvete chocolate</string>
+    </void>
+    <void property="valor">
+     <float>1.4</float>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Produto">
+    <void property="categoria">
+     <string>bebida</string>
+    </void>
+    <void property="id">
+     <int>3</int>
+    </void>
+    <void property="idEmpresa">
+     <int>1</int>
+    </void>
+    <void property="nome">
+     <string>Refrigerante</string>
+    </void>
+    <void property="valor">
+     <float>3.4</float>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Produto">
+    <void property="categoria">
+     <string>alimento</string>
+    </void>
+    <void property="id">
+     <int>4</int>
+    </void>
+    <void property="idEmpresa">
+     <int>2</int>
+    </void>
+    <void property="nome">
+     <string>Pastel de queijo</string>
+    </void>
+    <void property="valor">
+     <float>5.0</float>
+    </void>
+   </object>
+  </void>
+ </object>
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="MyFood.models.Pedido" id="Pedido0">
+    <void property="estado">
+     <object class="java.lang.Enum" method="valueOf">
+      <class>MyFood.models.EstadoPedido</class>
+      <string>PREPARANDO</string>
+     </object>
+    </void>
+    <void property="idCliente">
+     <int>2</int>
+    </void>
+    <void property="idEmpresa">
+     <int>1</int>
+    </void>
+    <void property="numero">
+     <int>1</int>
+    </void>
+    <void property="produtos">
+     <void method="add">
+      <int>1</int>
+     </void>
+     <void method="add">
+      <int>2</int>
+     </void>
+     <void method="add">
+      <int>3</int>
+     </void>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Pedido" id="Pedido1">
+    <void property="estado">
+     <object class="java.lang.Enum" id="EstadoPedido0" method="valueOf">
+      <class>MyFood.models.EstadoPedido</class>
+      <string>ABERTO</string>
+     </object>
+    </void>
+    <void property="idCliente">
+     <int>2</int>
+    </void>
+    <void property="idEmpresa">
+     <int>2</int>
+    </void>
+    <void property="numero">
+     <int>2</int>
+    </void>
+    <void property="produtos">
+     <void method="add">
+      <int>4</int>
+     </void>
+     <void method="add">
+      <int>4</int>
+     </void>
+    </void>
+   </object>
+  </void>
+  <void method="add">
+   <object class="MyFood.models.Pedido">
+    <void property="estado">
+     <object idref="EstadoPedido0"/>
+    </void>
+    <void property="idCliente">
+     <int>2</int>
+    </void>
+    <void property="idEmpresa">
+     <int>1</int>
+    </void>
+    <void property="numero">
+     <int>3</int>
+    </void>
+   </object>
+  </void>
+ </object>
+ <object class="java.util.ArrayList"/>
+ <int>3</int>
+ <int>3</int>
+ <int>5</int>
+ <int>4</int>
+ <int>1</int>
+</java>
