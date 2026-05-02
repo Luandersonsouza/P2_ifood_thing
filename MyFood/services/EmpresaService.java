@@ -142,6 +142,10 @@ public class EmpresaService {
                 .findFirst()
                 .orElseThrow(() -> new MyFoodException("Empresa nao cadastrada"));
 
+        if (atributo == null || atributo.trim().isEmpty()) {
+            throw new MyFoodException("Atributo invalido");
+        }
+
         switch (atributo.toLowerCase()) {
             case "nome": return empresa.getNome();
             case "endereco": return empresa.getEndereco();

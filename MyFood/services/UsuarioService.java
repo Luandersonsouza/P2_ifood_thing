@@ -72,6 +72,10 @@ public class UsuarioService {
                 .findFirst()
                 .orElseThrow(() -> new MyFoodException("Usuario nao cadastrado."));
 
+        if (atributo == null || atributo.trim().isEmpty()) {
+            throw new MyFoodException("Atributo invalido");
+        }
+
         switch (atributo.toLowerCase()) {
             case "nome": return usuario.getNome();
             case "email": return usuario.getEmail();

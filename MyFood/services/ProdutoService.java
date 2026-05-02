@@ -62,6 +62,10 @@ public class ProdutoService {
                 .findFirst()
                 .orElseThrow(() -> new MyFoodException("Produto nao encontrado"));
 
+        if (atributo == null || atributo.trim().isEmpty()) {
+            throw new MyFoodException("Atributo nao existe");
+        }
+
         switch (atributo.toLowerCase()) {
             case "valor": return String.format(Locale.US, "%.2f", produto.getValor());
             case "categoria": return produto.getCategoria();

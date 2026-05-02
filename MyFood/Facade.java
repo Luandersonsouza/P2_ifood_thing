@@ -16,7 +16,7 @@ public class Facade {
     private EntregaService entregaService = new EntregaService();
 
     public void zerarSistema() { db.zerar(); }
-    public void encerrarSistema() { System.exit(0); }
+    public void encerrarSistema() { }
 
     // criarUsuario (cliente)
     public void criarUsuario(String nome, String email, String senha, String endereco) {

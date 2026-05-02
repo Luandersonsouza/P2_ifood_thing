@@ -35,6 +35,10 @@ public class EntregaService {
                 .findFirst()
                 .orElseThrow(() -> new MyFoodException("Entrega nao encontrada"));
 
+        if (atributo == null || atributo.trim().isEmpty()) {
+            throw new MyFoodException("Atributo invalido");
+        }
+
         switch (atributo.toLowerCase()) {
             case "destino": return entrega.getDestino();
             case "entregue": return String.valueOf(entrega.isEntregue());
