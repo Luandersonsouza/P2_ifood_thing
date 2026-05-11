@@ -14,7 +14,7 @@ Essa divisao reduz o acoplamento entre as partes do sistema. Os testes nao preci
 
 ### 2.1 Main
 
-A classe `Main` e responsavel por iniciar a validacao do sistema com EasyAccept. Ela chama todos os arquivos de teste existentes no projeto, de `tests/us1_1.txt` ate `tests/us4_2.txt`, sempre apontando para `MyFood.Facade`.
+A classe `Main` e responsavel por iniciar a validacao do sistema com EasyAccept. Ela chama todos os arquivos de teste existentes no projeto, de `tests/us1_1.txt` ate `tests/us8_2.txt`, sempre apontando para `MyFood.Facade`. Com isso, a execucao principal valida desde o cadastro inicial de usuarios e restaurantes ate os fluxos mais recentes de mercados, farmacias, entregadores e entregas.
 
 Fluxo principal:
 
@@ -34,7 +34,11 @@ A classe `Facade` e a interface publica do sistema para os testes de aceitacao. 
 - `criarEmpresa`
 - `criarProduto`
 - `criarPedido`
+- `liberarPedido`
+- `obterPedido`
 - `criarEntrega`
+- `getEntrega`
+- `entregar`
 
 A `Facade` nao concentra as regras completas de negocio. Seu papel principal e receber a chamada externa, escolher o service correto e retornar o resultado no formato esperado pelos testes.
 
@@ -42,11 +46,11 @@ A `Facade` nao concentra as regras completas de negocio. Seu papel principal e r
 
 Os services representam a camada de regras de negocio:
 
-- `UsuarioService`: cria clientes, donos de empresa e entregadores; realiza login; consulta atributos de usuarios.
-- `EmpresaService`: cria restaurantes, mercados e farmacias; consulta empresas; cadastra entregadores; altera funcionamento de mercado.
+- `UsuarioService`: cria clientes, donos de empresa e entregadores; realiza login; consulta atributos de usuarios; valida dados especificos de entregadores, como veiculo e placa unica.
+- `EmpresaService`: cria restaurantes, mercados e farmacias; consulta empresas; cadastra entregadores; lista entregadores vinculados; lista empresas de um entregador; altera funcionamento de mercado.
 - `ProdutoService`: cria, edita, consulta e lista produtos.
-- `PedidoService`: cria pedidos, adiciona e remove produtos, fecha pedidos, libera pedidos e consulta seus atributos.
-- `EntregaService`: cria entregas, consulta entregas, entrega pedidos e obtem pedidos disponiveis para entregadores.
+- `PedidoService`: cria pedidos, adiciona e remove produtos, fecha pedidos, libera pedidos para entrega e consulta seus atributos.
+- `EntregaService`: cria entregas, consulta entregas, conclui entregas e obtem pedidos disponiveis para entregadores, priorizando pedidos de farmacia quando aplicavel.
 - `Validador`: centraliza validacoes comuns, como nome, email, senha, endereco, CPF, placa, valor, categoria e horario.
 
 Esses componentes interagem principalmente com `Database`, que guarda e atualiza os objetos do sistema.
@@ -58,9 +62,9 @@ Os models representam as entidades do dominio:
 - `Usuario`: classe abstrata base para `Cliente`, `DonoEmpresa` e `Entregador`.
 - `Empresa`: classe abstrata base para `Restaurante`, `Mercado` e `Farmacia`.
 - `Produto`: representa um item vendido por uma empresa.
-- `Pedido`: representa uma compra feita por um cliente em uma empresa.
-- `Entrega`: representa a entrega de um pedido por um entregador.
-- `EstadoPedido`: enum que representa os estados do pedido.
+- `Pedido`: representa uma compra feita por um cliente em uma empresa, mantendo cliente, empresa, produtos e estado.
+- `Entrega`: representa a entrega de um pedido por um entregador, incluindo destino, pedido associado e situacao de conclusao.
+- `EstadoPedido`: enum que representa os estados do pedido: aberto, preparando, pronto, entregando e entregue. O estado legado `LIBERADO` permanece no enum para compatibilidade com dados persistidos antigos, mas o fluxo atual usa `PRONTO`.
 
 As classes abstratas `Usuario` e `Empresa` permitem reaproveitar atributos comuns e especializar comportamentos nas subclasses.
 
@@ -130,7 +134,7 @@ Sempre que um objeto e adicionado ou atualizado, o `Database` salva os dados no 
 
 **Identificacao da Oportunidade:** O dominio de pedidos possui um ciclo de vida claro: aberto, preparando, pronto, entregando e entregue. Isso indicou a necessidade de controlar transicoes e impedir operacoes invalidas.
 
-**Aplicacao no Projeto:** A enum `EstadoPedido` representa os estados possiveis. `PedidoService` consulta esse estado antes de permitir operacoes como adicionar produto, remover produto, fechar pedido e liberar pedido. `EntregaService` tambem altera o estado do pedido para `ENTREGUE` quando a entrega e finalizada.
+**Aplicacao no Projeto:** A enum `EstadoPedido` representa os estados possiveis. `PedidoService` consulta esse estado antes de permitir operacoes como adicionar produto, remover produto, fechar pedido e liberar pedido. Quando um pedido e liberado, ele passa de `PREPARANDO` para `PRONTO`. `EntregaService` so cria entregas para pedidos prontos, muda o pedido para `ENTREGANDO` durante a entrega e altera o estado para `ENTREGUE` quando a entrega e finalizada.
 
 ### 3.6 Service Layer
 
@@ -170,13 +174,21 @@ A classe `Main` executa os seguintes arquivos:
 - `tests/us3_2.txt`
 - `tests/us4_1.txt`
 - `tests/us4_2.txt`
+- `tests/us5_1.txt`
+- `tests/us5_2.txt`
+- `tests/us6_1.txt`
+- `tests/us6_2.txt`
+- `tests/us7_1.txt`
+- `tests/us7_2.txt`
+- `tests/us8_1.txt`
+- `tests/us8_2.txt`
 
 ### 4.3 Executar com TestRunner Local
 
 O projeto tambem possui um executor proprio para os scripts:
 
 ```powershell
-java -cp bin tests.TestRunner tests/us1_1.txt tests/us1_2.txt tests/us2_1.txt tests/us2_2.txt tests/us3_1.txt tests/us3_2.txt tests/us4_1.txt tests/us4_2.txt
+java -cp "bin;lib\easyaccept.jar" tests.TestRunner tests/us1_1.txt tests/us1_2.txt tests/us2_1.txt tests/us2_2.txt tests/us3_1.txt tests/us3_2.txt tests/us4_1.txt tests/us4_2.txt tests/us5_1.txt tests/us5_2.txt tests/us6_1.txt tests/us6_2.txt tests/us7_1.txt tests/us7_2.txt tests/us8_1.txt tests/us8_2.txt
 ```
 
 ## 5. Consideracoes Finais
@@ -186,10 +198,15 @@ O MyFood atende as funcionalidades cobertas pelos testes de aceitacao presentes 
 - criacao e consulta de usuarios;
 - login;
 - criacao e consulta de empresas;
-- cadastro de restaurantes, mercados e farmacias;
+- cadastro de restaurantes, mercados e farmacias, incluindo horario de funcionamento de mercados e dados especificos de farmacias;
 - cadastro, edicao e listagem de produtos;
 - abertura, fechamento, liberacao e consulta de pedidos;
-- cadastro de entregadores em empresas;
-- criacao, consulta e conclusao de entregas.
+- controle do ciclo de vida dos pedidos: aberto, preparando, pronto, entregando e entregue;
+- cadastro de entregadores, com validacao de veiculo e placa unica;
+- cadastro de entregadores em empresas e consulta das empresas vinculadas a cada entregador;
+- obtencao de pedidos prontos para entrega, com prioridade para pedidos de farmacia;
+- criacao de entregas com destino informado ou destino padrao do cliente;
+- consulta de dados completos da entrega, incluindo cliente, empresa, pedido, entregador, destino e produtos;
+- conclusao de entregas, liberando o entregador e marcando o pedido como entregue.
 
 O design adotado favorece separacao de responsabilidades. A `Facade` simplifica o acesso externo, os services concentram regras de negocio, os models representam o dominio e o `Database` centraliza a persistencia. Essa organizacao torna o sistema mais facil de testar, manter e evoluir.

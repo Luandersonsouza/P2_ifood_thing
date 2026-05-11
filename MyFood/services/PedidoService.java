@@ -141,10 +141,13 @@ public class PedidoService {
 
     public void liberarPedido(int numero) {
         Pedido pedido = getPedido(numero);
-        if (pedido.getEstado() != EstadoPedido.PREPARANDO) {
-            throw new MyFoodException("Pedido nao pode ser liberado");
+        if (pedido.getEstado() == EstadoPedido.PRONTO) {
+            throw new MyFoodException("Pedido ja liberado");
         }
-        pedido.setEstado(EstadoPedido.LIBERADO);
+        if (pedido.getEstado() != EstadoPedido.PREPARANDO) {
+            throw new MyFoodException("Nao e possivel liberar um produto que nao esta sendo preparado");
+        }
+        pedido.setEstado(EstadoPedido.PRONTO);
         db.updatePedido(pedido);
     }
 }

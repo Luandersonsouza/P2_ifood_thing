@@ -56,7 +56,10 @@ public class Facade {
     public void alterarFuncionamento(int mercado, String abre, String fecha) { empresaService.alterarFuncionamento(mercado, abre, fecha); }
     public void cadastrarEntregador(int empresa, int entregador) { empresaService.cadastrarEntregador(empresa, entregador); }
 
-    public List<String> getEntregadores(int empresa) { return empresaService.getEntregadores(empresa); }
+    public String getEntregadores(int empresa) {
+        List<String> entregadores = empresaService.getEntregadores(empresa);
+        return "{[" + String.join(", ", entregadores) + "]}";
+    }
 
     // Ajuste para retornar a String formatada conforme os testes
     public String getEmpresas(int entregador) {

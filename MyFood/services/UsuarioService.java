@@ -45,14 +45,14 @@ public class UsuarioService {
         if (placa == null || placa.trim().isEmpty()) {
             throw new IllegalArgumentException("Placa invalido");
         }
-        if (db.getUsuarios().stream().anyMatch(u -> u.getEmail().equals(email))) {
-            throw new MyFoodException("Conta com esse email ja existe");
-        }
         // Unicidade de placa
         for (Usuario u : db.getUsuarios()) {
             if (u instanceof Entregador && ((Entregador) u).getPlaca().equals(placa)) {
                 throw new MyFoodException("Placa invalido");
             }
+        }
+        if (db.getUsuarios().stream().anyMatch(u -> u.getEmail().equals(email))) {
+            throw new MyFoodException("Conta com esse email ja existe");
         }
         Entregador entregador = new Entregador(nome, email, senha, endereco, veiculo, placa);
         db.addUsuario(entregador);

@@ -159,7 +159,13 @@ public class TestRunner {
                 int func = Integer.parseInt(p.get("numeroFuncionarios"));
                 return facade.criarEmpresa(tipo, dono, nome, endereco, a24, func);
             }
-            throw new RuntimeException("Tipo empresa desconhecido: " + tipo);
+            if (p.containsKey("abre") || p.containsKey("fecha") || p.containsKey("tipoMercado")) {
+                return facade.criarEmpresa(tipo, dono, nome, endereco, p.get("abre"), p.get("fecha"), p.get("tipoMercado"));
+            }
+            if (p.containsKey("tipoCozinha")) {
+                return facade.criarEmpresa(tipo, dono, nome, endereco, p.get("tipoCozinha"));
+            }
+            throw new RuntimeException("Tipo de empresa invalido");
         }
 
         else if (command.startsWith("getEmpresasDoUsuario ")) {
@@ -278,16 +284,7 @@ public class TestRunner {
 
         else if (command.startsWith("getEntregadores ")) {
             Map<String, String> p = extractParams(command.substring("getEntregadores ".length()));
-            List<String> list = facade.getEntregadores(Integer.parseInt(p.get("empresa")));
-            StringBuilder sb = new StringBuilder("{");
-            sb.append("[");
-            for (int i = 0; i < list.size(); i++) {
-                if (i > 0) sb.append(", ");
-                sb.append(list.get(i));
-            }
-            sb.append("]");
-            sb.append("}");
-            return sb.toString();
+            return facade.getEntregadores(Integer.parseInt(p.get("empresa")));
         }
 
         else if (command.startsWith("getEmpresas ")) {
@@ -316,14 +313,12 @@ public class TestRunner {
 
     private Map<String, String> extractParams(String paramStr) {
         Map<String, String> map = new HashMap<>();
-        Pattern p = Pattern.compile("(\\w+)=(\"[^\"]*\"|[^\\s\"]*)");
+        Pattern p = Pattern.compile("(\\w+)=(?:\"([^\"]*)\"|([^\\s\"]*))");
         Matcher m = p.matcher(paramStr);
         while (m.find()) {
             String key = m.group(1);
-            String val = m.group(2);
-            if (val.startsWith("\"") && val.endsWith("\"")) {
-                val = val.substring(1, val.length()-1);
-            }
+            String val = m.group(2) != null ? m.group(2) : m.group(3);
+            if (val != null && val.isEmpty() && m.group(2) == null) val = null;
             map.put(key, val);
         }
         return map;

@@ -29,14 +29,18 @@ public class Validador {
     }
     public static void validarHora(String hora) {
         if (hora == null || !hora.matches("\\d{2}:\\d{2}")) throw new IllegalArgumentException("Formato de hora invalido");
-        String[] p = hora.split(":");
-        int h = Integer.parseInt(p[0]); int m = Integer.parseInt(p[1]);
-        if (h < 0 || h > 23 || m < 0 || m > 59) throw new IllegalArgumentException("Formato de hora invalido");
     }
     public static void validarHorario(String abre, String fecha) {
         validarHora(abre); validarHora(fecha);
+        validarFaixaHora(abre);
+        validarFaixaHora(fecha);
         int minAbre = toMinutes(abre); int minFecha = toMinutes(fecha);
         if (minAbre >= minFecha) throw new IllegalArgumentException("Horario invalido");
+    }
+    private static void validarFaixaHora(String hora) {
+        String[] p = hora.split(":");
+        int h = Integer.parseInt(p[0]); int m = Integer.parseInt(p[1]);
+        if (h < 0 || h > 23 || m < 0 || m > 59) throw new IllegalArgumentException("Horario invalido");
     }
     private static int toMinutes(String hora) {
         String[] p = hora.split(":"); return Integer.parseInt(p[0])*60 + Integer.parseInt(p[1]);

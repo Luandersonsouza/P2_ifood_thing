@@ -2,5 +2,5 @@
 package MyFood.models;
 
 public enum EstadoPedido {
-    ABERTO, PREPARANDO, LIBERADO, ENTREGUE
+    ABERTO, PREPARANDO, LIBERADO, PRONTO, ENTREGANDO, ENTREGUE
 }

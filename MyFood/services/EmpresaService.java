@@ -54,7 +54,7 @@ public class EmpresaService {
         if (endereco == null || endereco.trim().isEmpty()) throw new MyFoodException("Endereco da empresa invalido");
         if (tipoMercado == null || tipoMercado.trim().isEmpty()) throw new MyFoodException("Tipo de mercado invalido");
 
-        if (abre == null || fecha == null || abre.isBlank() || fecha.isBlank()) {
+        if (abre == null || fecha == null) {
             throw new MyFoodException("Horario invalido");
         }
         Validador.validarHorario(abre, fecha);
@@ -209,6 +209,8 @@ public class EmpresaService {
     }
 
     public List<Empresa> getEmpresasDoEntregador(int idEntregador) {
+        Usuario entregador = usuarioService.getUsuario(idEntregador);
+        if (!(entregador instanceof Entregador)) throw new MyFoodException("Usuario nao e um entregador");
         return db.getEmpresas().stream()
                 .filter(e -> e.getEntregadores().contains(idEntregador))
                 .collect(Collectors.toList());
@@ -217,7 +219,7 @@ public class EmpresaService {
     public void alterarFuncionamento(int idMercado, String abre, String fecha) {
         Empresa empresa = getEmpresa(idMercado);
         if (!(empresa instanceof Mercado)) throw new MyFoodException("Nao e um mercado valido");
-        if (abre == null || fecha == null || abre.isBlank() || fecha.isBlank()) throw new MyFoodException("Horario invalido");
+        if (abre == null || fecha == null) throw new MyFoodException("Horario invalido");
         Validador.validarHorario(abre, fecha);
         Mercado m = (Mercado) empresa;
         m.setAbre(abre);
